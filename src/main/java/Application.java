@@ -38,7 +38,6 @@ public class Application {
                             .ifPresent(selectedCowboy -> {
                                 System.out.println(cowboy.getName() + " selected the target: " + selectedCowboy.getName());
                                 selectedCowboy.takeHit(cowboy.getDamage());
-                                gameState.put(selectedCowboy.getName(), selectedCowboy);
                             });
 
                     try {
