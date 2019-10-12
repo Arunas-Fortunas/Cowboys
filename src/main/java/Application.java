@@ -34,7 +34,7 @@ public class Application {
                     gameState.entrySet().stream()
                             .filter(e -> !e.getKey().equals(cowboy.getName()) && e.getValue().isAlive())
                             .map(Map.Entry::getValue)
-                            .findFirst()
+                            .findAny()
                             .ifPresent(selectedCowboy -> {
                                 System.out.println(cowboy.getName() + " selected the target: " + selectedCowboy.getName());
                                 selectedCowboy.takeHit(cowboy.getDamage());
