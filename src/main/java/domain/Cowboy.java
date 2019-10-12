@@ -8,11 +8,11 @@ public class Cowboy {
     private volatile int health;
     private volatile int damage;
 
-    public boolean isAlive() {
+    synchronized public boolean isAlive() {
         return this.health > 0;
     }
 
-    public void takeHit(int hit) {
+    synchronized public void takeHit(int hit) {
         System.out.println(this.getName() + " with health [" + this.health + "] receives a hit with damage [" + hit + "]");
         setHealth(this.health - hit);
     }
