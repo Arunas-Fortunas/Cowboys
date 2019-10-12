@@ -12,35 +12,33 @@ public class Application {
         System.out.println("Game Start");
 
         var cowboysProvider = new CowboysProvider();
-        var gameSate = new ConcurrentHashMap<String, Cowboy>(5);
+        var gameState = new ConcurrentHashMap<String, Cowboy>(5);
 
         final var cowboys = cowboysProvider.getCowboys();
 
         for (var cowboy : cowboys) {
             System.out.println("Adding cowboy: " + cowboy);
-            gameSate.put(cowboy.getName(), cowboy);
+            gameState.put(cowboy.getName(), cowboy);
         }
 
         var latch = new CountDownLatch(4);
 
-        for (var cowboy : gameSate.values()) {
+        for (var cowboy : gameState.values()) {
             Executors.newFixedThreadPool(1).execute(() -> {
                 while (true) {
-                    var stillAlive = gameSate.values().stream().filter(Cowboy::isAlive).count();
-
-                    if (!cowboy.isAlive() || stillAlive == 1) {
+                    if (!cowboy.isAlive() || isOnlyOneManStanding(gameState)) {
                         latch.countDown();
                         break;
                     }
 
-                    gameSate.entrySet().stream()
+                    gameState.entrySet().stream()
                             .filter(e -> !e.getKey().equals(cowboy.getName()) && e.getValue().isAlive())
                             .map(Map.Entry::getValue)
                             .findFirst()
                             .ifPresent(selectedCowboy -> {
                                 System.out.println(cowboy.getName() + " selected the target: " + selectedCowboy.getName());
                                 selectedCowboy.takeHit(cowboy.getDamage());
-                                gameSate.put(selectedCowboy.getName(), selectedCowboy);
+                                gameState.put(selectedCowboy.getName(), selectedCowboy);
                             });
 
                     try {
@@ -54,7 +52,11 @@ public class Application {
 
         latch.await();
 
-        gameSate.values().stream().filter(Cowboy::isAlive).findFirst().ifPresent(winner -> System.out.println("WINNER: " + winner));
+        gameState.values().stream().filter(Cowboy::isAlive).findFirst().ifPresent(winner -> System.out.println("WINNER: " + winner));
         System.out.println("Game End");
+    }
+
+    private static boolean isOnlyOneManStanding(Map<String, Cowboy> gameState) {
+        return gameState.values().stream().filter(Cowboy::isAlive).count() == 1;
     }
 }
