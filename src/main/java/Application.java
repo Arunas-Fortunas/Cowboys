@@ -13,13 +13,10 @@ public class Application {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Game Start");
-
-        var cowboysProvider = new CowboysProvider();
         var gameState = new ConcurrentHashMap<String, Cowboy>(COWBOYS_COUNT);
 
-        final var cowboys = cowboysProvider.getCowboys();
-
-        for (var cowboy : cowboys) {
+        var cowboysProvider = new CowboysProvider();
+        for (var cowboy : cowboysProvider.getCowboys()) {
             System.out.println("Adding cowboy: " + cowboy);
             gameState.put(cowboy.getName(), cowboy);
         }
@@ -36,7 +33,8 @@ public class Application {
                     }
 
                     gameState.entrySet().stream()
-                            .filter(e -> !e.getKey().equals(cowboy.getName()) && e.getValue().isAlive())
+                            .filter(entry -> !cowboy.hasName(entry.getKey()))
+                            .filter(entry -> entry.getValue().isAlive())
                             .map(Map.Entry::getValue)
                             .findAny()
                             .ifPresent(selectedCowboy -> {

@@ -17,6 +17,10 @@ public class Cowboy {
         setHealth(this.health - hit);
     }
 
+    public boolean hasName(String name) {
+        return this.getName().equals(name);
+    }
+
     @Override
     public String toString() {
         return "Cowboy{" +
