@@ -17,8 +17,8 @@ public class Cowboy {
         setHealth(this.health - hit);
     }
 
-    public boolean hasName(String name) {
-        return this.getName().equals(name);
+    public boolean hasSameName(Cowboy cowboy) {
+        return this.getName().equals(cowboy.getName());
     }
 
     @Override

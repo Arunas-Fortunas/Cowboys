@@ -15,8 +15,8 @@ public class Application {
         System.out.println("Game Start");
         var gameState = new ConcurrentHashMap<String, Cowboy>(COWBOYS_COUNT);
 
-        var cowboysProvider = new CowboysProvider();
-        for (var cowboy : cowboysProvider.getCowboys()) {
+        var cowboys = new CowboysProvider().getCowboys();
+        for (var cowboy : cowboys) {
             System.out.println("Adding cowboy: " + cowboy);
             gameState.put(cowboy.getName(), cowboy);
         }
@@ -24,23 +24,25 @@ public class Application {
         var latch = new CountDownLatch(4);
         var executorService = Executors.newFixedThreadPool(COWBOYS_COUNT);
 
-        for (var cowboy : gameState.values()) {
+        for (var shootingCowboy : cowboys) {
             executorService.execute(() -> {
                 while (true) {
-                    if (!cowboy.isAlive() || isOnlyOneManStanding(gameState)) {
+                    if (!shootingCowboy.isAlive() || isOnlyOneManStanding(gameState)) {
                         latch.countDown();
                         break;
                     }
 
-                    gameState.entrySet().stream()
-                            .filter(entry -> !cowboy.hasName(entry.getKey()))
-                            .filter(entry -> entry.getValue().isAlive())
-                            .map(Map.Entry::getValue)
+                    gameState.values().stream()
+                            .filter(selectedCowboy -> !shootingCowboy.hasSameName(selectedCowboy))
                             .findAny()
                             .ifPresent(selectedCowboy -> {
-                                System.out.println(cowboy.getName() + " selected the target: " + selectedCowboy.getName());
-                                selectedCowboy.takeHit(cowboy.getDamage());
-                                gameState.put(selectedCowboy.getName(), selectedCowboy);
+                                System.out.println(shootingCowboy.getName() + " selected the target: " + selectedCowboy.getName());
+                                selectedCowboy.takeHit(shootingCowboy.getDamage());
+
+                                if (!selectedCowboy.isAlive()) {
+                                    System.out.println("Cowboy is dead: " + selectedCowboy);
+                                    gameState.remove(selectedCowboy.getName());
+                                }
                             });
 
                     try {
@@ -54,7 +56,7 @@ public class Application {
 
         latch.await();
 
-        gameState.values().stream().filter(Cowboy::isAlive).findFirst().ifPresent(winner -> System.out.println("WINNER: " + winner));
+        System.out.println("WINNER: " + getWinner(gameState));
         System.out.println("Game End");
 
         executorService.shutdown();
@@ -62,6 +64,13 @@ public class Application {
     }
 
     private static boolean isOnlyOneManStanding(Map<String, Cowboy> gameState) {
-        return gameState.values().stream().filter(Cowboy::isAlive).count() == 1;
+        return gameState.size() == 1;
+    }
+
+    private static Cowboy getWinner(Map<String, Cowboy> gameState) {
+        if (gameState.size() != 1)
+            throw new IllegalStateException("should be only one man standing");
+
+        return gameState.values().stream().findAny().get();
     }
 }
