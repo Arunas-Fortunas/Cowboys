@@ -2,6 +2,7 @@ import domain.Cowboy;
 import provider.CowboysProvider;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -34,6 +35,7 @@ public class Application {
 
                     gameState.values().stream()
                             .filter(selectedCowboy -> !shootingCowboy.hasSameName(selectedCowboy))
+                            .skip((int) (gameState.size() * Math.random()))
                             .findAny()
                             .ifPresent(selectedCowboy -> {
                                 System.out.println(shootingCowboy.getName() + " selected the target: " + selectedCowboy.getName());
