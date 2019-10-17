@@ -2,7 +2,6 @@ import domain.Cowboy;
 import provider.CowboysProvider;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -22,13 +21,13 @@ public class Application {
             gameState.put(cowboy.getName(), cowboy);
         }
 
-        var latch = new CountDownLatch(4);
+        var latch = new CountDownLatch(COWBOYS_COUNT - 1);
         var executorService = Executors.newFixedThreadPool(COWBOYS_COUNT);
 
         for (var shootingCowboy : cowboys) {
             executorService.execute(() -> {
                 while (true) {
-                    if (!shootingCowboy.isAlive() || isOnlyOneManStanding(gameState)) {
+                    if (shootingCowboy.isDead() || isOnlyOneManStanding(gameState)) {
                         latch.countDown();
                         break;
                     }
@@ -41,7 +40,7 @@ public class Application {
                                 System.out.println(shootingCowboy.getName() + " selected the target: " + selectedCowboy.getName());
                                 selectedCowboy.takeHit(shootingCowboy.getDamage());
 
-                                if (!selectedCowboy.isAlive()) {
+                                if (selectedCowboy.isDead()) {
                                     System.out.println("Cowboy is dead: " + selectedCowboy);
                                     gameState.remove(selectedCowboy.getName());
                                 }

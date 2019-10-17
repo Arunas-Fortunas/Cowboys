@@ -6,15 +6,15 @@ import lombok.Data;
 public class Cowboy {
     private String name;
     private volatile int health;
-    private volatile int damage;
+    private int damage;
 
-    synchronized public boolean isAlive() {
-        return this.health > 0;
+    public boolean isDead() {
+        return this.health <= 0;
     }
 
-    synchronized public void takeHit(int hit) {
-        System.out.println(this.getName() + " with health [" + this.health + "] receives a hit with damage [" + hit + "]");
-        setHealth(this.health - hit);
+    public synchronized void takeHit(int damage) {
+        System.out.println(this.getName() + " with health [" + this.health + "] receives a damage with damage [" + damage + "]");
+        setHealth(this.health - damage);
     }
 
     public boolean hasSameName(Cowboy cowboy) {
